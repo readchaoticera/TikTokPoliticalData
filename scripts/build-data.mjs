@@ -169,20 +169,14 @@ async function main() {
   }
 
   // Keep only consistently active accounts: present every month with a value
-  // for every metric, AND clearing minimum monthly thresholds in EVERY month
-  // (at least MIN_POSTS posts and MIN_VIEWS views). This drops one-off and
-  // low-volume accounts so each line is a continuous, meaningful series.
-  const MIN_POSTS = 10;
+  // for every metric, AND receiving at least MIN_VIEWS views in EVERY month.
+  // This drops one-off and low-volume accounts so each line is a continuous,
+  // meaningful series.
   const MIN_VIEWS = 500000;
   const complete = [...accounts.values()].filter(
     (a) =>
       ALLOW.has(norm(a.name)) ||
-      MONTHS.every(
-        (m) =>
-          a.posts[m.key] >= MIN_POSTS &&
-          a.views[m.key] >= MIN_VIEWS &&
-          a.engagements[m.key] > 0
-      )
+      MONTHS.every((m) => a.views[m.key] >= MIN_VIEWS && a.posts[m.key] > 0 && a.engagements[m.key] > 0)
   );
   const dropped = accounts.size - complete.length;
 
@@ -213,7 +207,7 @@ async function main() {
   console.log(
     `Wrote data/timeseries.json — ${list.length} accounts present in all ${MONTHS.length} months ` +
       `(left ${leanCounts.left || 0}, neutral ${leanCounts.neutral || 0}, right ${leanCounts.right || 0}); ` +
-      `dropped ${dropped} below the every-month thresholds (>=${MIN_POSTS} posts, >=${MIN_VIEWS.toLocaleString()} views).`
+      `dropped ${dropped} below the every-month threshold (>=${MIN_VIEWS.toLocaleString()} views).`
   );
 }
 
