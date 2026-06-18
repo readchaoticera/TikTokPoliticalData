@@ -159,25 +159,30 @@
           .attr("r", 3.4);
       });
 
-      // Tooltip only for a single hovered series.
-      if (withTip && ids.length === 1) {
+      // Tooltip only for a single hovered series — a small box near the cursor.
+      if (withTip && ids.length === 1 && cursor) {
         const s = series[ids[0]];
-        const mi = cursor.mi;
-        const pt = s.points.find((p) => p.mi === mi) || s.points[s.points.length - 1];
+        const pt = s.points.find((p) => p.mi === cursor.mi) || s.points[s.points.length - 1];
         tip
           .html(
             `<strong>${escapeHTML(s.acct.name)}</strong><br>` +
               `${months[pt.mi].label}: ${NF.format(pt.v)} ${metric}` +
-              `<span class="tip-lean">${LEAN_LABEL[s.acct.lean]} · click name in list to open TikTok</span>`
+              `<span class="tip-lean">${LEAN_LABEL[s.acct.lean]} · click in the list below to open TikTok</span>`
           )
           .style("opacity", 1);
         const rect = el.getBoundingClientRect();
-        const px = (x(pt.mi) / W) * rect.width;
-        const py = (y(pt.v) / H) * rect.height;
+        // cursor.mx / cursor.my are in SVG units; scale to rendered pixels.
+        const cx = (cursor.mx / W) * rect.width;
+        const cy = (cursor.my / H) * rect.height;
         const tw = tip.node().offsetWidth;
-        tip
-          .style("left", Math.min(Math.max(px - tw / 2, 4), rect.width - tw - 4) + "px")
-          .style("top", Math.max(py - tip.node().offsetHeight - 12, 4) + "px");
+        const th = tip.node().offsetHeight;
+        let left = cx + 16;
+        if (left + tw > rect.width - 4) left = cx - tw - 16;
+        left = Math.max(4, Math.min(left, rect.width - tw - 4));
+        let top = cy - th - 14;
+        if (top < 4) top = cy + 18;
+        top = Math.max(4, Math.min(top, rect.height - th - 4));
+        tip.style("left", left + "px").style("top", top + "px");
       } else {
         tip.style("opacity", 0);
       }
@@ -217,7 +222,7 @@
           }
         }
         if (pick >= 0) {
-          drawOverlay([pick], true, { mi });
+          drawOverlay([pick], true, { mi, mx, my });
           onHighlight && onHighlight(series[pick].acct);
         }
       })

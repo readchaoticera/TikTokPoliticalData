@@ -132,12 +132,10 @@
   }
 
   // When hovering a chart line, mirror the highlight onto its directory row.
+  // (No scrolling — the chart tooltip already names the account in place.)
   function onChartHover(acct) {
     const row = els.dirList.querySelector(`.dir-row[data-id="${acct._id}"]`);
-    if (row) {
-      setActiveRow(row);
-      row.scrollIntoView({ block: "nearest" });
-    }
+    setActiveRow(row || null);
   }
   function onChartLeave() {
     setActiveRow(null);
