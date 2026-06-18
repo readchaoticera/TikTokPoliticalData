@@ -60,9 +60,10 @@ array in `scripts/build-data.mjs`, and rebuild.
 
 - Charts use a **logarithmic** vertical scale so accounts spanning a handful of
   posts to billions of views all stay legible on one screen.
-- Only accounts present in **every** month are charted, so each line runs
-  unbroken across the full timeline. Accounts missing from any month are dropped
-  by `scripts/build-data.mjs`.
+- Only consistently active accounts are charted: present in **every** month and,
+  in **every** month, posting at least **10 times** and receiving at least
+  **500,000 views**. Accounts that miss any month or fall below those thresholds
+  are dropped by `scripts/build-data.mjs` (tune `MIN_POSTS` / `MIN_VIEWS` there).
 - **Partisan lean** is a subjective editorial judgment by Chaotic Era, not a
   scientific measure.
 

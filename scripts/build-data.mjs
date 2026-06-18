@@ -154,11 +154,18 @@ async function main() {
     }
   }
 
-  // Keep only accounts with a value for every metric in every month, so each
-  // line spans the full timeline without gaps.
+  // Keep only consistently active accounts: present every month with a value
+  // for every metric, AND clearing minimum monthly thresholds in EVERY month
+  // (at least MIN_POSTS posts and MIN_VIEWS views). This drops one-off and
+  // low-volume accounts so each line is a continuous, meaningful series.
+  const MIN_POSTS = 10;
+  const MIN_VIEWS = 500000;
   const complete = [...accounts.values()].filter((a) =>
     MONTHS.every(
-      (m) => a.posts[m.key] > 0 && a.views[m.key] > 0 && a.engagements[m.key] > 0
+      (m) =>
+        a.posts[m.key] >= MIN_POSTS &&
+        a.views[m.key] >= MIN_VIEWS &&
+        a.engagements[m.key] > 0
     )
   );
   const dropped = accounts.size - complete.length;
@@ -190,7 +197,7 @@ async function main() {
   console.log(
     `Wrote data/timeseries.json — ${list.length} accounts present in all ${MONTHS.length} months ` +
       `(left ${leanCounts.left || 0}, neutral ${leanCounts.neutral || 0}, right ${leanCounts.right || 0}); ` +
-      `dropped ${dropped} with at least one missing month.`
+      `dropped ${dropped} below the every-month thresholds (>=${MIN_POSTS} posts, >=${MIN_VIEWS.toLocaleString()} views).`
   );
 }
 
