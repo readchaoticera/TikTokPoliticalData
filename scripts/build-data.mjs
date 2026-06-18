@@ -47,9 +47,11 @@ const MONTHS = [
   { file: "MAY_2026.csv", key: "2026-05", label: "May 2026", short: "May" },
 ];
 
-// Accounts to exclude entirely (normalized names). Daily Mail's view volume is
-// so far above everyone else that it distorts the shared scale.
-const EXCLUDE = new Set(["daily mail"]);
+// Accounts to exclude entirely (normalized names).
+const EXCLUDE = new Set();
+// Accounts to always include, even if they miss the every-month thresholds
+// below. Their line simply breaks for any month with no data.
+const ALLOW = new Set(["fox news", "team trump"]);
 
 // Map the source lean labels onto the brand's three-bucket scheme.
 const LEAN_MAP = {
@@ -172,13 +174,15 @@ async function main() {
   // low-volume accounts so each line is a continuous, meaningful series.
   const MIN_POSTS = 10;
   const MIN_VIEWS = 500000;
-  const complete = [...accounts.values()].filter((a) =>
-    MONTHS.every(
-      (m) =>
-        a.posts[m.key] >= MIN_POSTS &&
-        a.views[m.key] >= MIN_VIEWS &&
-        a.engagements[m.key] > 0
-    )
+  const complete = [...accounts.values()].filter(
+    (a) =>
+      ALLOW.has(norm(a.name)) ||
+      MONTHS.every(
+        (m) =>
+          a.posts[m.key] >= MIN_POSTS &&
+          a.views[m.key] >= MIN_VIEWS &&
+          a.engagements[m.key] > 0
+      )
   );
   const dropped = accounts.size - complete.length;
 

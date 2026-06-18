@@ -171,10 +171,22 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 24px 64px; }
 .chart-head p { margin: 0; font-size: 0.9rem; color: var(--ink-soft); }
 
 /* Linear / Log scale toggle (one per chart, top-right of its header) */
-.scale-toggle {
+.scale-control {
   position: absolute;
   top: 2px;
   right: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.scale-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+.scale-toggle {
   display: inline-flex;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
@@ -344,5 +356,5 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 24px 64px; }
   .dir-row { grid-template-columns: 1fr auto; gap: 10px; padding: 9px 12px; }
   /* Drop the scale toggle below the heading instead of overlapping it. */
   .chart-head { padding-right: 0; }
-  .scale-toggle { position: static; margin-top: 8px; }
+  .scale-control { position: static; margin-top: 8px; }
 }

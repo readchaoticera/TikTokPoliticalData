@@ -46,7 +46,14 @@
           if (v > maxV) maxV = v;
         }
       });
-      if (pts.length) series.push({ acct, points: pts });
+      if (pts.length) {
+        // `points` holds only months with data (for dots / hit-testing / tooltips);
+        // `full` spans every month with null gaps so the line breaks where data
+        // is missing (via line.defined below).
+        const present = new Map(pts.map((p) => [p.mi, p.v]));
+        const full = months.map((_, mi) => ({ mi, v: present.has(mi) ? present.get(mi) : null }));
+        series.push({ acct, points: pts, full, complete: pts.length === months.length });
+      }
     });
     if (!isFinite(minV)) {
       minV = 1;
@@ -85,7 +92,7 @@
         y = d3.scaleLinear().domain([0, maxV]).range([H - m.bottom, m.top]).nice();
         yTicks = y.ticks(6);
       }
-      line = d3.line().x((d) => x(d.mi)).y((d) => y(d.v)).curve(d3.curveMonotoneX);
+      line = d3.line().defined((d) => d.v != null).x((d) => x(d.mi)).y((d) => y(d.v)).curve(d3.curveMonotoneX);
     }
     buildScale();
 
@@ -135,7 +142,7 @@
       yAxisG
         .call(d3.axisLeft(y).tickValues(yTicks).tickFormat(abbr).tickSize(0).tickPadding(8))
         .call((g) => g.select(".domain").remove());
-      linesG.selectAll("path.ln").attr("d", (s) => line(s.points));
+      linesG.selectAll("path.ln").attr("d", (s) => line(s.full));
       linesG
         .selectAll("circle.dotpt")
         .attr("cx", (s) => x(s.points[0].mi))
@@ -162,7 +169,7 @@
         if (!s) return;
         const color = COLORS[s.acct.lean] || COLORS.neutral;
         if (s.points.length >= 2) {
-          overlay.append("path").attr("class", "hl-line").attr("stroke", color).attr("d", line(s.points));
+          overlay.append("path").attr("class", "hl-line").attr("stroke", color).attr("d", line(s.full));
         }
         overlay
           .selectAll(null)
@@ -181,20 +188,25 @@
     // tracks the month you point at).
     function showTip(si, mi, anchor, locked) {
       const s = series[si];
-      const pt = s.points.find((p) => p.mi === mi) || s.points[s.points.length - 1];
+      const pt = s.points.find((p) => p.mi === mi);
       const hint = locked
         ? "click again or press Esc to unlock"
         : "click to lock · open in the list below";
+      const valLine = pt
+        ? `${months[mi].label}: ${NF.format(pt.v)} ${metric}`
+        : `${months[mi].label}: no data`;
       tip
         .html(
           `<strong>${escapeHTML(s.acct.name)}</strong><br>` +
-            `${months[pt.mi].label}: ${NF.format(pt.v)} ${metric}` +
+            valLine +
             `<span class="tip-lean">${LEAN_LABEL[s.acct.lean]} · ${hint}</span>`
         )
         .style("opacity", 1);
       const rect = el.getBoundingClientRect();
-      const ax = anchor.mode === "cursor" ? anchor.mx : x(pt.mi);
-      const ay = anchor.mode === "cursor" ? anchor.my : y(pt.v);
+      // Anchor to the data point when we have one; otherwise follow the cursor.
+      const useCursor = anchor.mode === "cursor" || !pt;
+      const ax = useCursor ? anchor.mx : x(pt.mi);
+      const ay = useCursor ? anchor.my : y(pt.v);
       const cx = (ax / W) * rect.width;
       const cy = (ay / H) * rect.height;
       const tw = tip.node().offsetWidth;
@@ -252,7 +264,7 @@
         const mi = nearestMonth(mx);
         if (lockedSi != null) {
           // Locked: keep this line up; just read off the month under the cursor.
-          showTip(lockedSi, mi, { mode: "point" }, true);
+          showTip(lockedSi, mi, { mode: "point", mx, my }, true);
           return;
         }
         const { si } = pickSeries(mi, my);
@@ -285,23 +297,24 @@
 
     // Per-chart Linear / Log scale toggle, injected into the chart header.
     const head = el.parentElement.querySelector(".chart-head");
-    const toggle = document.createElement("div");
-    toggle.className = "scale-toggle";
-    toggle.setAttribute("role", "group");
-    toggle.setAttribute("aria-label", "Vertical scale");
-    toggle.innerHTML =
+    const control = document.createElement("div");
+    control.className = "scale-control";
+    control.innerHTML =
+      `<span class="scale-label">Scale:</span>` +
+      `<span class="scale-toggle" role="group" aria-label="Vertical scale">` +
       `<button type="button" data-scale="linear" class="is-on">Linear</button>` +
-      `<button type="button" data-scale="log">Log</button>`;
-    if (head) head.appendChild(toggle);
+      `<button type="button" data-scale="log">Log</button>` +
+      `</span>`;
+    if (head) head.appendChild(control);
     function setScale(type) {
       if (type !== "linear" && type !== "log") return;
       if (type === scaleType) return;
       scaleType = type;
       buildScale();
       redraw();
-      toggle.querySelectorAll("button").forEach((b) => b.classList.toggle("is-on", b.dataset.scale === type));
+      control.querySelectorAll("button").forEach((b) => b.classList.toggle("is-on", b.dataset.scale === type));
     }
-    toggle.querySelectorAll("button").forEach((b) =>
+    control.querySelectorAll("button").forEach((b) =>
       b.addEventListener("click", () => setScale(b.dataset.scale))
     );
 
