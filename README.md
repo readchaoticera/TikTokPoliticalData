@@ -31,7 +31,7 @@ There is no build step for the page itself — `index.html`, `styles.css`,
 ## Data
 
 Monthly snapshots live in `data/raw/` as one CSV per month
-(`MAY_2025.csv` … `SEPTEMBER_2025.csv`). Each row is one account for that month
+(`MAY_2025.csv` … `FEBRUARY_2026.csv`). Each row is one account for that month
 with columns including `entity`, `political_lean`, `posts`, `total_views`,
 `total_engagements`, and a `platforms` cell holding the account's TikTok URL.
 

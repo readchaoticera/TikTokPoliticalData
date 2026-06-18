@@ -28,6 +28,11 @@ const MONTHS = [
   { file: "JULY_2025.csv", key: "2025-07", label: "July 2025", short: "Jul" },
   { file: "AUGUST_2025.csv", key: "2025-08", label: "August 2025", short: "Aug" },
   { file: "SEPTEMBER_2025.csv", key: "2025-09", label: "September 2025", short: "Sep" },
+  { file: "OCTOBER_2025.csv", key: "2025-10", label: "October 2025", short: "Oct" },
+  { file: "NOVEMBER_2025.csv", key: "2025-11", label: "November 2025", short: "Nov" },
+  { file: "DECEMBER_2025.csv", key: "2025-12", label: "December 2025", short: "Dec" },
+  { file: "JANUARY_2026.csv", key: "2026-01", label: "January 2026", short: "Jan" },
+  { file: "FEBRUARY_2026.csv", key: "2026-02", label: "February 2026", short: "Feb" },
 ];
 
 // Map the source lean labels onto the brand's three-bucket scheme.
