@@ -1,0 +1,318 @@
+/* ============================================================
+   Chaotic Era — Political TikTok Trends
+   Brand tokens shared with the Substack & YouTube leaderboards.
+   ============================================================ */
+:root {
+  --ink: #0d1117;          /* near-black text */
+  --ink-soft: #5b6675;     /* muted cool grey */
+  --paper: #fafcff;        /* Chaotic Era background */
+  --paper-card: #ffffff;
+  --line: #e6edf6;
+  --line-strong: #cdd9e8;
+  --accent: #419eff;       /* Chaotic Era blue */
+  --accent-dark: #2486ec;  /* hover / links */
+  --accent-soft: #eaf4ff;
+  --gold: #d9a441;         /* sample-data banner */
+  --left: #419eff;         /* Left-Leaning */
+  --neutral: #9aa6b2;      /* Neutral */
+  --right: #fa2c5d;        /* Right-Leaning */
+  --shadow: 0 1px 2px rgba(13, 17, 23, 0.05), 0 8px 24px rgba(65, 158, 255, 0.08);
+  --serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.5;
+  font-feature-settings: "tnum" 1;
+}
+a { color: inherit; }
+
+/* ---------- Masthead ---------- */
+.masthead {
+  background: var(--paper-card);
+  color: var(--ink);
+  border-bottom: 3px solid var(--accent);
+}
+.masthead-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand { display: inline-flex; align-items: center; gap: 11px; text-decoration: none; color: var(--ink); }
+.brand-logo { width: 40px; height: 40px; border-radius: 9px; display: block; object-fit: cover; }
+.brand-name {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+.subscribe-btn {
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  border-radius: 999px;
+  transition: background 0.15s ease;
+}
+.subscribe-btn:hover { background: var(--accent-dark); }
+
+/* ---------- Layout ---------- */
+main { max-width: 1120px; margin: 0 auto; padding: 0 24px 64px; }
+
+/* ---------- Hero ---------- */
+.hero { padding: 56px 0 28px; }
+.kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0 0 12px;
+}
+.hero h1 {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(2.1rem, 5vw, 3.4rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  margin: 0 0 16px;
+}
+.dek { font-size: 1.08rem; color: var(--ink-soft); margin: 0; }
+
+/* ---------- Controls ---------- */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+  margin-bottom: 18px;
+}
+.legend-toggles { display: inline-flex; flex-wrap: wrap; gap: 8px; }
+.lg-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line-strong);
+  background: var(--paper-card);
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.lg-toggle .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; transition: opacity 0.15s ease; }
+.lg-toggle .lg-count { color: var(--ink-soft); font-weight: 500; font-variant-numeric: tabular-nums; }
+.lg-toggle.is-on { color: var(--ink); border-color: var(--line-strong); box-shadow: var(--shadow); }
+.lg-toggle:not(.is-on) { opacity: 0.55; }
+.lg-toggle:not(.is-on) .dot { opacity: 0.3; }
+.lg-toggle:hover { color: var(--ink); }
+
+.tools { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.search {
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  padding: 9px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--paper-card);
+  min-width: 240px;
+  color: var(--ink);
+}
+.search:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+.meta { font-size: 0.8rem; color: var(--ink-soft); }
+
+/* ---------- Banner ---------- */
+.banner {
+  background: #fff8e8;
+  border: 1px solid var(--gold);
+  color: #6b4e16;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  margin-bottom: 18px;
+}
+
+/* ---------- Marketing callout ---------- */
+.cta {
+  background: #02101f;
+  color: #fff;
+  border-radius: 12px;
+  padding: 16px 22px;
+  margin: 0 0 26px;
+  box-shadow: var(--shadow);
+}
+.cta p { margin: 0; font-size: 1rem; line-height: 1.45; font-weight: 500; }
+.cta a { color: #fff; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
+.cta a:hover { text-decoration: none; }
+
+/* ---------- Chart blocks ---------- */
+.chart-block { margin: 0 0 26px; }
+.chart-head { margin-bottom: 10px; }
+.chart-head h2 { font-family: var(--serif); font-size: 1.4rem; margin: 0 0 2px; }
+.chart-head p { margin: 0; font-size: 0.9rem; color: var(--ink-soft); }
+.chart {
+  position: relative;
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 10px 12px 6px;
+  overflow: hidden;
+}
+.chart-svg { width: 100%; height: auto; display: block; }
+
+/* Line layers */
+.ln { fill: none; stroke-width: 1; stroke-opacity: 0.22; transition: stroke-opacity 0.12s ease; }
+.ln.lean-left { stroke: var(--left); }
+.ln.lean-neutral { stroke: var(--neutral); }
+.ln.lean-right { stroke: var(--right); }
+.dotpt { stroke: #fff; stroke-width: 0.5; fill-opacity: 0.5; }
+.dotpt.lean-left { fill: var(--left); }
+.dotpt.lean-neutral { fill: var(--neutral); }
+.dotpt.lean-right { fill: var(--right); }
+
+/* When something is focused, dim the baseline field further */
+.chart.is-focused .ln { stroke-opacity: 0.07; }
+.chart.is-focused .dotpt { fill-opacity: 0.12; }
+
+/* Lean hidden via legend toggle */
+.hide-left .ln.lean-left, .hide-left .dotpt.lean-left,
+.hide-neutral .ln.lean-neutral, .hide-neutral .dotpt.lean-neutral,
+.hide-right .ln.lean-right, .hide-right .dotpt.lean-right { display: none; }
+
+/* Highlight overlay */
+.hl-line { fill: none; stroke-width: 2.6; stroke-linejoin: round; stroke-linecap: round; }
+.hl-dot { stroke: #fff; stroke-width: 1.5; }
+
+/* Axes */
+.axis text { fill: var(--ink-soft); font-size: 11px; font-family: var(--sans); }
+.axis .domain { stroke: var(--line-strong); }
+.axis .tick line { stroke: var(--line); }
+.grid line { stroke: var(--line); shape-rendering: crispEdges; }
+.grid .domain { stroke: none; }
+.axis-title { fill: var(--ink-soft); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+
+/* Tooltip */
+.chart-tip {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+  background: var(--ink);
+  color: #fff;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  padding: 8px 11px;
+  border-radius: 8px;
+  max-width: 260px;
+  box-shadow: 0 6px 20px rgba(13, 17, 23, 0.25);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.chart-tip strong { font-weight: 700; }
+.chart-tip .tip-lean { display: inline-block; margin-top: 2px; font-size: 0.72rem; opacity: 0.85; }
+
+/* ---------- Account directory ---------- */
+.directory { margin-top: 34px; }
+.dir-list {
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  max-height: 460px;
+  overflow-y: auto;
+}
+.dir-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto;
+  gap: 14px;
+  align-items: center;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.85rem;
+  cursor: default;
+}
+.dir-row:last-child { border-bottom: 0; }
+.dir-row:hover, .dir-row.is-active { background: #f4f9ff; }
+.dir-name { display: inline-flex; align-items: center; gap: 9px; min-width: 0; }
+.dir-name .swatch { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+.dir-name a { color: var(--accent-dark); text-decoration: none; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dir-name a:hover { text-decoration: underline; }
+.dir-stat { font-variant-numeric: tabular-nums; color: var(--ink-soft); white-space: nowrap; text-align: right; }
+.dir-stat b { color: var(--ink); font-weight: 600; }
+.dir-head {
+  position: sticky;
+  top: 0;
+  background: #f1f7fe;
+  border-bottom: 2px solid var(--line-strong);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-soft);
+  font-weight: 700;
+  cursor: default;
+  z-index: 1;
+}
+.dir-head:hover { background: #f1f7fe; }
+
+/* Lean pills (methodology) */
+.lean {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 1px 9px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.lean-left { background: #dbe9ff; color: #1d4ed8; border-color: #b8d4ff; }
+.lean-neutral { background: #eef1f5; color: #5b6675; border-color: #dbe2ea; }
+.lean-right { background: #ffe1e1; color: #dc2626; border-color: #f6c4c4; }
+
+.empty { padding: 28px 16px; text-align: center; color: var(--ink-soft); }
+
+/* ---------- Methodology ---------- */
+.methodology {
+  margin-top: 40px;
+  padding: 24px 28px;
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.methodology h2 { font-family: var(--serif); font-size: 1.3rem; margin: 0 0 12px; }
+.methodology ul { margin: 0; padding-left: 20px; color: var(--ink-soft); }
+.methodology li { margin-bottom: 8px; font-size: 0.92rem; }
+
+/* ---------- Footer ---------- */
+.site-footer { border-top: 1px solid var(--line); background: var(--ink); color: #aab4c0; }
+.site-footer p { max-width: 1120px; margin: 0 auto; padding: 24px; font-size: 0.85rem; }
+.site-footer a { color: #fff; }
+
+/* Embed mode (?embed=1): blend into a host page / iframe */
+.embed .masthead, .embed .site-footer { display: none; }
+.embed .hero { padding-top: 28px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 720px) {
+  .hero { padding: 36px 0 20px; }
+  .dir-row { grid-template-columns: 1fr auto auto; gap: 10px; padding: 9px 12px; }
+  .dir-stat.opt { display: none; }
+}

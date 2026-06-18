@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Political TikTok Trends · Chaotic Era</title>
+    <script>
+      /* ?embed=1 -> hide masthead/footer so the page blends inside an iframe */
+      try {
+        if (new URLSearchParams(location.search).has("embed"))
+          document.documentElement.classList.add("embed");
+      } catch (e) {}
+    </script>
+    <link rel="icon" type="image/png" href="assets/logo.png" />
+    <link rel="apple-touch-icon" href="assets/logo.png" />
+    <meta
+      name="description"
+      content="Interactive monthly trends for the biggest political TikTok accounts — posts, views, and engagements from May 2025, coloured by partisan lean. Built by Chaotic Era."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="masthead-inner">
+        <a class="brand" href="https://chaoticera.news" target="_blank" rel="noopener">
+          <img class="brand-logo" src="assets/logo.png" alt="Chaotic Era logo" width="40" height="40" />
+          <span class="brand-name">Chaotic Era</span>
+        </a>
+        <a class="subscribe-btn" href="https://chaoticera.news/subscribe" target="_blank" rel="noopener">
+          Subscribe
+        </a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="kicker">The Chaotic Era Leaderboard</p>
+        <h1>The Political Ecosystem on TikTok</h1>
+        <p class="dek">
+          How the biggest political accounts on <strong>TikTok</strong> have grown month over month
+          since May 2025 — their <strong>posts</strong>, the <strong>views</strong> they pulled in,
+          and the <strong>engagements</strong> they earned — every account coloured by its partisan
+          lean. Created by Kyle Tharp.
+        </p>
+      </section>
+
+      <div class="controls">
+        <div class="legend-toggles" id="legend" aria-label="Toggle partisan lean groups">
+          <button class="lg-toggle is-on" data-lean="left">
+            <i class="dot" style="background:#419eff"></i>Left-Leaning<span class="lg-count" data-count="left"></span>
+          </button>
+          <button class="lg-toggle is-on" data-lean="neutral">
+            <i class="dot" style="background:#9aa6b2"></i>Neutral<span class="lg-count" data-count="neutral"></span>
+          </button>
+          <button class="lg-toggle is-on" data-lean="right">
+            <i class="dot" style="background:#fa2c5d"></i>Right-Leaning<span class="lg-count" data-count="right"></span>
+          </button>
+        </div>
+        <div class="tools">
+          <input
+            id="search"
+            type="search"
+            class="search"
+            placeholder="Find an account…"
+            aria-label="Find an account"
+          />
+          <span id="meta" class="meta"></span>
+        </div>
+      </div>
+
+      <div id="banner" class="banner" hidden></div>
+
+      <aside class="cta">
+        <p>
+          Join <strong>16,000+</strong> political and media insiders for data-driven insights you
+          can't get anywhere else.
+          <a href="https://www.chaoticera.news" target="_blank" rel="noopener">Subscribe to Chaotic Era here &raquo;</a>
+        </p>
+      </aside>
+
+      <section class="chart-block" aria-label="Total posts by month">
+        <div class="chart-head">
+          <h2>Total Posts by Month</h2>
+          <p>How many videos each account published each month. Log scale.</p>
+        </div>
+        <div class="chart" id="chart-posts"></div>
+      </section>
+
+      <section class="chart-block" aria-label="Total views by month">
+        <div class="chart-head">
+          <h2>Total Views by Month</h2>
+          <p>Total views each account's content received each month. Log scale.</p>
+        </div>
+        <div class="chart" id="chart-views"></div>
+      </section>
+
+      <section class="chart-block" aria-label="Total engagements by month">
+        <div class="chart-head">
+          <h2>Total Engagements by Month</h2>
+          <p>Total likes, comments, shares, and saves each month. Log scale.</p>
+        </div>
+        <div class="chart" id="chart-engagements"></div>
+      </section>
+
+      <section class="directory">
+        <div class="chart-head">
+          <h2>Accounts</h2>
+          <p>
+            Hover a row to trace that account across all three charts. Click a name to open the
+            account on TikTok.
+          </p>
+        </div>
+        <div class="dir-list" id="dir-list"></div>
+        <p id="dir-empty" class="empty" hidden>No accounts match your search.</p>
+      </section>
+
+      <section class="methodology">
+        <h2>About this page</h2>
+        <ul>
+          <li>
+            Each line is a single <strong>political TikTok account</strong>, traced across monthly
+            snapshots beginning in <strong>May 2025</strong>. Lines are coloured by partisan lean:
+            <span class="lean lean-left">Left-Leaning</span>,
+            <span class="lean lean-neutral">Neutral</span>, and
+            <span class="lean lean-right">Right-Leaning</span>.
+          </li>
+          <li>
+            <strong>Posts</strong> is the number of videos published in the month.
+            <strong>Views</strong> and <strong>Engagements</strong> are the totals that account's
+            content received that month (engagements = likes, comments, shares, and saves).
+          </li>
+          <li>
+            Charts use a <strong>logarithmic</strong> vertical scale so the full field — from
+            accounts posting a handful of videos to those pulling in billions of views — stays
+            legible on one screen. A break in a line means the account wasn't in that month's data.
+          </li>
+          <li>
+            <strong>Partisan lean</strong> is a <em>subjective editorial judgment</em>, not a
+            scientific measure — reasonable people will disagree. Spot one you'd label differently?
+            <a href="https://chaoticera.news" target="_blank" rel="noopener">Let us know.</a>
+          </li>
+          <li>
+            Use the legend to show or hide a lean group, and the search box to find a specific
+            account. Account names link to their TikTok profiles.
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>
+        Built by <a href="https://chaoticera.news" target="_blank" rel="noopener">Chaotic Era</a> ·
+        Politics, media &amp; online influence by Kyle Tharp.
+      </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script src="chart.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
