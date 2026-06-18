@@ -31,7 +31,7 @@ There is no build step for the page itself — `index.html`, `styles.css`,
 ## Data
 
 Monthly snapshots live in `data/raw/` as one CSV per month
-(`MAY_2025.csv` … `FEBRUARY_2026.csv`). Each row is one account for that month
+(`MAY_2025.csv` … `MAY_2026.csv`). Each row is one account for that month
 with columns including `entity`, `political_lean`, `posts`, `total_views`,
 `total_engagements`, and a `platforms` cell holding the account's TikTok URL.
 
@@ -60,7 +60,9 @@ array in `scripts/build-data.mjs`, and rebuild.
 
 - Charts use a **logarithmic** vertical scale so accounts spanning a handful of
   posts to billions of views all stay legible on one screen.
-- A break in a line means the account wasn't present in that month's data.
+- Only accounts present in **every** month are charted, so each line runs
+  unbroken across the full timeline. Accounts missing from any month are dropped
+  by `scripts/build-data.mjs`.
 - **Partisan lean** is a subjective editorial judgment by Chaotic Era, not a
   scientific measure.
 

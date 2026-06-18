@@ -23,7 +23,9 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 // Monthly files in chronological order. key is an ISO-ish sortable month id;
 // label is what the UI shows on the x-axis.
 const MONTHS = [
-  { file: "MAY_2025.csv", key: "2025-05", label: "May 2025", short: "May" },
+  // short labels carry the year at each year boundary (May ’25, Jan ’26) so the
+  // repeated May reads unambiguously across the year change.
+  { file: "MAY_2025.csv", key: "2025-05", label: "May 2025", short: "May ’25" },
   { file: "JUNE_2025.csv", key: "2025-06", label: "June 2025", short: "Jun" },
   { file: "JULY_2025.csv", key: "2025-07", label: "July 2025", short: "Jul" },
   { file: "AUGUST_2025.csv", key: "2025-08", label: "August 2025", short: "Aug" },
@@ -31,8 +33,11 @@ const MONTHS = [
   { file: "OCTOBER_2025.csv", key: "2025-10", label: "October 2025", short: "Oct" },
   { file: "NOVEMBER_2025.csv", key: "2025-11", label: "November 2025", short: "Nov" },
   { file: "DECEMBER_2025.csv", key: "2025-12", label: "December 2025", short: "Dec" },
-  { file: "JANUARY_2026.csv", key: "2026-01", label: "January 2026", short: "Jan" },
+  { file: "JANUARY_2026.csv", key: "2026-01", label: "January 2026", short: "Jan ’26" },
   { file: "FEBRUARY_2026.csv", key: "2026-02", label: "February 2026", short: "Feb" },
+  { file: "MARCH_2026.csv", key: "2026-03", label: "March 2026", short: "Mar" },
+  { file: "APRIL_2026.csv", key: "2026-04", label: "April 2026", short: "Apr" },
+  { file: "MAY_2026.csv", key: "2026-05", label: "May 2026", short: "May" },
 ];
 
 // Map the source lean labels onto the brand's three-bucket scheme.
@@ -149,7 +154,16 @@ async function main() {
     }
   }
 
-  const list = [...accounts.values()].sort((a, b) => {
+  // Keep only accounts with a value for every metric in every month, so each
+  // line spans the full timeline without gaps.
+  const complete = [...accounts.values()].filter((a) =>
+    MONTHS.every(
+      (m) => a.posts[m.key] > 0 && a.views[m.key] > 0 && a.engagements[m.key] > 0
+    )
+  );
+  const dropped = accounts.size - complete.length;
+
+  const list = complete.sort((a, b) => {
     const av = lastValue(a.views);
     const bv = lastValue(b.views);
     return bv - av;
@@ -174,8 +188,9 @@ async function main() {
 
   const leanCounts = list.reduce((m, a) => ((m[a.lean] = (m[a.lean] || 0) + 1), m), {});
   console.log(
-    `Wrote data/timeseries.json — ${list.length} accounts across ${MONTHS.length} months ` +
-      `(left ${leanCounts.left || 0}, neutral ${leanCounts.neutral || 0}, right ${leanCounts.right || 0}).`
+    `Wrote data/timeseries.json — ${list.length} accounts present in all ${MONTHS.length} months ` +
+      `(left ${leanCounts.left || 0}, neutral ${leanCounts.neutral || 0}, right ${leanCounts.right || 0}); ` +
+      `dropped ${dropped} with at least one missing month.`
   );
 }
 
