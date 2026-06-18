@@ -1,7 +1,7 @@
 # Political TikTok Trends — Chaotic Era
 
 An interactive web page charting how the biggest **political TikTok accounts**
-have changed month over month since **May 2025**. Three longitudinal line charts
+have changed month over month since **January 2025**. Three longitudinal line charts
 show, per account:
 
 - **Total posts** published each month
@@ -31,7 +31,7 @@ There is no build step for the page itself — `index.html`, `styles.css`,
 ## Data
 
 Monthly snapshots live in `data/raw/` as one CSV per month
-(`MAY_2025.csv` … `MAY_2026.csv`). Each row is one account for that month
+(`JANUARY_2025.csv` … `MAY_2026.csv`). Each row is one account for that month
 with columns including `entity`, `political_lean`, `posts`, `total_views`,
 `total_engagements`, and a `platforms` cell holding the account's TikTok URL.
 
