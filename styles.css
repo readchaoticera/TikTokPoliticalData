@@ -270,7 +270,7 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 24px 64px; }
 }
 .dir-row {
   display: grid;
-  grid-template-columns: 1fr auto auto auto auto;
+  grid-template-columns: 1fr auto;
   gap: 14px;
   align-items: center;
   padding: 9px 16px;
@@ -341,8 +341,7 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 24px 64px; }
 /* ---------- Responsive ---------- */
 @media (max-width: 720px) {
   .hero { padding: 36px 0 20px; }
-  .dir-row { grid-template-columns: 1fr auto auto; gap: 10px; padding: 9px 12px; }
-  .dir-stat.opt { display: none; }
+  .dir-row { grid-template-columns: 1fr auto; gap: 10px; padding: 9px 12px; }
   /* Drop the scale toggle below the heading instead of overlapping it. */
   .chart-head { padding-right: 0; }
   .scale-toggle { position: static; margin-top: 8px; }

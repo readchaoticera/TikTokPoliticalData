@@ -70,9 +70,6 @@
       : `<span>${escapeHTML(acct.name)}</span>`;
     return `<div class="dir-row" data-id="${acct._id}">
         <span class="dir-name"><i class="swatch" style="background:${leanColor(acct.lean)}"></i>${nameInner}</span>
-        <span class="dir-stat" title="Posts (latest month)"><b>${abbr(latest(acct.posts))}</b> posts</span>
-        <span class="dir-stat opt" title="Views (latest month)"><b>${abbr(latest(acct.views))}</b> views</span>
-        <span class="dir-stat opt" title="Engagements (latest month)"><b>${abbr(latest(acct.engagements))}</b> eng</span>
         <span class="dir-stat" title="Partisan lean">${LEAN_LABEL[acct.lean]}</span>
       </div>`;
   }
@@ -95,8 +92,7 @@
     const list = visibleAccounts();
     els.dirList.innerHTML =
       `<div class="dir-row dir-head">
-        <span>Account</span><span>Posts</span><span class="opt">Views</span>
-        <span class="opt">Eng.</span><span>Lean</span>
+        <span>Account</span><span>Lean</span>
       </div>` + list.map(rowHTML).join("");
     els.dirEmpty.hidden = list.length > 0;
     els.dirList.hidden = list.length === 0;
