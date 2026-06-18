@@ -166,9 +166,36 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 24px 64px; }
 
 /* ---------- Chart blocks ---------- */
 .chart-block { margin: 0 0 26px; }
-.chart-head { margin-bottom: 10px; }
+.chart-head { margin-bottom: 10px; position: relative; padding-right: 150px; }
 .chart-head h2 { font-family: var(--serif); font-size: 1.4rem; margin: 0 0 2px; }
 .chart-head p { margin: 0; font-size: 0.9rem; color: var(--ink-soft); }
+
+/* Linear / Log scale toggle (one per chart, top-right of its header) */
+.scale-toggle {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  display: inline-flex;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--paper-card);
+  box-shadow: var(--shadow);
+}
+.scale-toggle button {
+  border: 0;
+  background: transparent;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.74rem;
+  color: var(--ink-soft);
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.scale-toggle button + button { border-left: 1px solid var(--line-strong); }
+.scale-toggle button.is-on { background: var(--accent); color: #fff; }
+.scale-toggle button:not(.is-on):hover { color: var(--ink); }
 .chart {
   position: relative;
   background: var(--paper-card);
@@ -316,4 +343,7 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 24px 64px; }
   .hero { padding: 36px 0 20px; }
   .dir-row { grid-template-columns: 1fr auto auto; gap: 10px; padding: 9px 12px; }
   .dir-stat.opt { display: none; }
+  /* Drop the scale toggle below the heading instead of overlapping it. */
+  .chart-head { padding-right: 0; }
+  .scale-toggle { position: static; margin-top: 8px; }
 }

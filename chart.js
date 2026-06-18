@@ -54,9 +54,7 @@
     }
 
     const x = d3.scalePoint().domain(months.map((_, i) => i)).range([m.left, W - m.right]).padding(0.5);
-    // Linear scale anchored at 0 so vertical distance is proportional to the
-    // actual value (a jump from 1M→10M looks far smaller than 100M→1B).
-    const y = d3.scaleLinear().domain([0, maxV]).range([H - m.bottom, m.top]).nice();
+    const minPos = Math.max(1, minV);
 
     const svg = d3
       .select(el)
@@ -66,28 +64,35 @@
       .attr("role", "img")
       .attr("aria-label", `${metric} per month for ${series.length} political TikTok accounts, coloured by partisan lean`);
 
-    // Evenly spaced linear gridlines.
-    const yTicks = y.ticks(6);
-    svg
-      .append("g")
-      .attr("class", "grid")
-      .selectAll("line")
-      .data(yTicks)
-      .join("line")
-      .attr("x1", m.left)
-      .attr("x2", W - m.right)
-      .attr("y1", (d) => y(d))
-      .attr("y2", (d) => y(d));
+    // The y-scale is swappable between linear (default) and log. `line`, the
+    // gridline/axis ticks, and the hit-test pixel cache are all derived from it.
+    let scaleType = "linear";
+    let y;
+    let yTicks;
+    let line;
 
-    // Y axis
-    svg
-      .append("g")
-      .attr("class", "axis")
-      .attr("transform", `translate(${m.left},0)`)
-      .call(d3.axisLeft(y).tickValues(yTicks).tickFormat(abbr).tickSize(0).tickPadding(8))
-      .call((g) => g.select(".domain").remove());
+    function buildScale() {
+      if (scaleType === "log") {
+        // Each power of ten is equally spaced (compresses the giants).
+        y = d3.scaleLog().domain([minPos, maxV]).range([H - m.bottom, m.top]);
+        yTicks = [];
+        for (let e = Math.floor(Math.log10(minPos)); Math.pow(10, e) <= maxV * 1.0001; e++) {
+          yTicks.push(Math.pow(10, e));
+        }
+        if (!yTicks.length) yTicks = [minPos, maxV];
+      } else {
+        // Anchored at 0 so vertical distance is proportional to actual value.
+        y = d3.scaleLinear().domain([0, maxV]).range([H - m.bottom, m.top]).nice();
+        yTicks = y.ticks(6);
+      }
+      line = d3.line().x((d) => x(d.mi)).y((d) => y(d.v)).curve(d3.curveMonotoneX);
+    }
+    buildScale();
 
-    // X axis
+    const gridG = svg.append("g").attr("class", "grid");
+    const yAxisG = svg.append("g").attr("class", "axis").attr("transform", `translate(${m.left},0)`);
+
+    // X axis (fixed — only y changes with the scale toggle).
     svg
       .append("g")
       .attr("class", "axis")
@@ -95,38 +100,50 @@
       .call(d3.axisBottom(x).tickFormat((i) => months[i].short).tickSize(0).tickPadding(8))
       .call((g) => g.select(".domain").remove());
 
-    const line = d3
-      .line()
-      .x((d) => x(d.mi))
-      .y((d) => y(d.v))
-      .curve(d3.curveMonotoneX);
-
-    // Baseline faint lines + dots for single-point series.
+    // Baseline lines + dots for single-point series (geometry set in redraw()).
     const linesG = svg.append("g").attr("class", "lines");
     linesG
       .selectAll("path")
       .data(series.filter((s) => s.points.length >= 2))
       .join("path")
-      .attr("class", (s) => `ln lean-${s.acct.lean}`)
-      .attr("d", (s) => line(s.points));
+      .attr("class", (s) => `ln lean-${s.acct.lean}`);
     linesG
       .selectAll("circle")
       .data(series.filter((s) => s.points.length === 1))
       .join("circle")
       .attr("class", (s) => `dotpt lean-${s.acct.lean}`)
-      .attr("cx", (s) => x(s.points[0].mi))
-      .attr("cy", (s) => y(s.points[0].v))
       .attr("r", 2.4);
 
     // Overlay layer for highlighted account(s).
     const overlay = svg.append("g").attr("class", "overlay");
     const tip = d3.select(el).append("div").attr("class", "chart-tip");
 
-    // Precompute pixel positions per month for nearest-line hit testing.
-    const byMonth = months.map(() => []);
-    series.forEach((s, si) => {
-      s.points.forEach((p) => byMonth[p.mi].push({ si, py: y(p.v), v: p.v }));
-    });
+    // Pixel positions per month for nearest-line hit testing (rebuilt on redraw).
+    let byMonth = months.map(() => []);
+
+    // Apply the current scale to the gridlines, axis, baseline geometry, the
+    // hit-test cache, and any active highlight. Called on load and scale change.
+    function redraw() {
+      gridG
+        .selectAll("line")
+        .data(yTicks)
+        .join("line")
+        .attr("x1", m.left)
+        .attr("x2", W - m.right)
+        .attr("y1", (d) => y(d))
+        .attr("y2", (d) => y(d));
+      yAxisG
+        .call(d3.axisLeft(y).tickValues(yTicks).tickFormat(abbr).tickSize(0).tickPadding(8))
+        .call((g) => g.select(".domain").remove());
+      linesG.selectAll("path.ln").attr("d", (s) => line(s.points));
+      linesG
+        .selectAll("circle.dotpt")
+        .attr("cx", (s) => x(s.points[0].mi))
+        .attr("cy", (s) => y(s.points[0].v));
+      byMonth = months.map(() => []);
+      series.forEach((s, si) => s.points.forEach((p) => byMonth[p.mi].push({ si, py: y(p.v), v: p.v })));
+      if (lockedSi != null) drawLines([lockedSi]); // re-anchor the locked overlay
+    }
 
     // Track which leans are visible (mirrors legend toggles) for hit-testing,
     // and which series (if any) is currently locked open by a click.
@@ -265,6 +282,30 @@
         else target = si;
         onLock && onLock(target == null ? null : series[target].acct);
       });
+
+    // Per-chart Linear / Log scale toggle, injected into the chart header.
+    const head = el.parentElement.querySelector(".chart-head");
+    const toggle = document.createElement("div");
+    toggle.className = "scale-toggle";
+    toggle.setAttribute("role", "group");
+    toggle.setAttribute("aria-label", "Vertical scale");
+    toggle.innerHTML =
+      `<button type="button" data-scale="linear" class="is-on">Linear</button>` +
+      `<button type="button" data-scale="log">Log</button>`;
+    if (head) head.appendChild(toggle);
+    function setScale(type) {
+      if (type !== "linear" && type !== "log") return;
+      if (type === scaleType) return;
+      scaleType = type;
+      buildScale();
+      redraw();
+      toggle.querySelectorAll("button").forEach((b) => b.classList.toggle("is-on", b.dataset.scale === type));
+    }
+    toggle.querySelectorAll("button").forEach((b) =>
+      b.addEventListener("click", () => setScale(b.dataset.scale))
+    );
+
+    redraw(); // initial paint with the default (linear) scale
 
     return {
       metric,
