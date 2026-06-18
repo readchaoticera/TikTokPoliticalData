@@ -180,19 +180,20 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 24px 64px; }
 }
 .chart-svg { width: 100%; height: auto; display: block; }
 
-/* Line layers */
-.ln { fill: none; stroke-width: 1; stroke-opacity: 0.22; transition: stroke-opacity 0.12s ease; }
+/* Line layers — bold by default; fade only when a line is focused/locked. */
+.ln { fill: none; stroke-width: 1.25; stroke-opacity: 0.85; transition: stroke-opacity 0.12s ease; }
 .ln.lean-left { stroke: var(--left); }
 .ln.lean-neutral { stroke: var(--neutral); }
 .ln.lean-right { stroke: var(--right); }
-.dotpt { stroke: #fff; stroke-width: 0.5; fill-opacity: 0.5; }
+.dotpt { stroke: #fff; stroke-width: 0.5; fill-opacity: 0.85; }
 .dotpt.lean-left { fill: var(--left); }
 .dotpt.lean-neutral { fill: var(--neutral); }
 .dotpt.lean-right { fill: var(--right); }
 
-/* When something is focused, dim the baseline field further */
-.chart.is-focused .ln { stroke-opacity: 0.07; }
+/* When one line is hovered or locked, the rest recede into the background. */
+.chart.is-focused .ln { stroke-opacity: 0.16; }
 .chart.is-focused .dotpt { fill-opacity: 0.12; }
+.chart.is-locked .interaction { cursor: default; }
 
 /* Lean hidden via legend toggle */
 .hide-left .ln.lean-left, .hide-left .dotpt.lean-left,

@@ -13,6 +13,7 @@
     charts: null,
     visibleLeans: new Set(["left", "neutral", "right"]),
     filter: "",
+    lockedId: null, // account frozen open by a click, or null
   };
 
   const els = {
@@ -110,13 +111,16 @@
     els.meta.textContent = `${list.length} of ${state.data.count} accounts${when ? " · " + when : ""}`;
 
     // Hovering a directory row traces that account across all three charts.
+    // While a line is locked, row hovers are ignored so they don't fight it.
     els.dirList.querySelectorAll(".dir-row[data-id]").forEach((row) => {
       const id = Number(row.dataset.id);
       row.addEventListener("mouseenter", () => {
+        if (state.lockedId != null) return;
         setActiveRow(row);
         state.charts && state.charts.highlight([id]);
       });
       row.addEventListener("mouseleave", () => {
+        if (state.lockedId != null) return;
         setActiveRow(null);
         state.charts && state.charts.clear();
       });
@@ -134,10 +138,27 @@
   // When hovering a chart line, mirror the highlight onto its directory row.
   // (No scrolling — the chart tooltip already names the account in place.)
   function onChartHover(acct) {
+    if (state.lockedId != null) return;
     const row = els.dirList.querySelector(`.dir-row[data-id="${acct._id}"]`);
     setActiveRow(row || null);
   }
   function onChartLeave() {
+    if (state.lockedId != null) return;
+    setActiveRow(null);
+  }
+
+  // Clicking a line freezes it open across all charts; clicking it again (or
+  // empty space, or Esc) releases it.
+  function onChartLock(acct) {
+    state.lockedId = acct ? acct._id : null;
+    state.charts && state.charts.setLocked(state.lockedId);
+    const row = acct ? els.dirList.querySelector(`.dir-row[data-id="${acct._id}"]`) : null;
+    setActiveRow(row || null);
+  }
+  function clearLock() {
+    if (state.lockedId == null) return;
+    state.lockedId = null;
+    state.charts && state.charts.setLocked(null);
     setActiveRow(null);
   }
 
@@ -168,6 +189,7 @@
           state.visibleLeans.add(lean);
           btn.classList.add("is-on");
         }
+        clearLock();
         applyLeanClasses();
         renderDirectory();
       });
@@ -212,6 +234,12 @@
     state.charts = window.createTikTokCharts(data, {
       onHover: onChartHover,
       onLeave: onChartLeave,
+      onLock: onChartLock,
+    });
+
+    // Esc releases a locked line.
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") clearLock();
     });
 
     wireLegend();
@@ -219,6 +247,7 @@
     renderDirectory();
 
     els.search.addEventListener("input", (e) => {
+      clearLock();
       state.filter = nameKey(e.target.value);
       renderDirectory();
       // Reflect search matches on the charts when the set is small enough to read.

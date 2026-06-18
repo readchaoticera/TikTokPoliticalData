@@ -26,7 +26,7 @@
   }
 
   // Build one chart for a given metric ("posts" | "views" | "engagements").
-  function buildChart(el, data, metric, onHighlight, onLeave) {
+  function buildChart(el, data, metric, onHighlight, onLeave, onLock) {
     const months = data.months;
     const W = 940;
     const H = 380;
@@ -128,24 +128,24 @@
       s.points.forEach((p) => byMonth[p.mi].push({ si, py: y(p.v), v: p.v }));
     });
 
-    function drawOverlay(ids, withTip, cursor) {
+    // Track which leans are visible (mirrors legend toggles) for hit-testing,
+    // and which series (if any) is currently locked open by a click.
+    let currentVisibleLeans = new Set(["left", "neutral", "right"]);
+    let lockedSi = null;
+
+    // Draw the bold highlight overlay for a set of series indices, and toggle
+    // the dimming of the rest of the field.
+    function drawLines(ids) {
       overlay.selectAll("*").remove();
       const focused = ids && ids.length;
       el.classList.toggle("is-focused", !!focused);
-      if (!focused) {
-        tip.style("opacity", 0);
-        return;
-      }
+      if (!focused) return;
       ids.forEach((si) => {
         const s = series[si];
         if (!s) return;
         const color = COLORS[s.acct.lean] || COLORS.neutral;
         if (s.points.length >= 2) {
-          overlay
-            .append("path")
-            .attr("class", "hl-line")
-            .attr("stroke", color)
-            .attr("d", line(s.points));
+          overlay.append("path").attr("class", "hl-line").attr("stroke", color).attr("d", line(s.points));
         }
         overlay
           .selectAll(null)
@@ -157,39 +157,73 @@
           .attr("cy", (p) => y(p.v))
           .attr("r", 3.4);
       });
-
-      // Tooltip only for a single hovered series — a small box near the cursor.
-      if (withTip && ids.length === 1 && cursor) {
-        const s = series[ids[0]];
-        const pt = s.points.find((p) => p.mi === cursor.mi) || s.points[s.points.length - 1];
-        tip
-          .html(
-            `<strong>${escapeHTML(s.acct.name)}</strong><br>` +
-              `${months[pt.mi].label}: ${NF.format(pt.v)} ${metric}` +
-              `<span class="tip-lean">${LEAN_LABEL[s.acct.lean]} · click in the list below to open TikTok</span>`
-          )
-          .style("opacity", 1);
-        const rect = el.getBoundingClientRect();
-        // cursor.mx / cursor.my are in SVG units; scale to rendered pixels.
-        const cx = (cursor.mx / W) * rect.width;
-        const cy = (cursor.my / H) * rect.height;
-        const tw = tip.node().offsetWidth;
-        const th = tip.node().offsetHeight;
-        let left = cx + 16;
-        if (left + tw > rect.width - 4) left = cx - tw - 16;
-        left = Math.max(4, Math.min(left, rect.width - tw - 4));
-        let top = cy - th - 14;
-        if (top < 4) top = cy + 18;
-        top = Math.max(4, Math.min(top, rect.height - th - 4));
-        tip.style("left", left + "px").style("top", top + "px");
-      } else {
-        tip.style("opacity", 0);
-      }
     }
 
-    // Interaction surface for nearest-line detection.
+    // Show the tooltip for one series at a given month. `anchor` is either the
+    // cursor position (free hover) or the data point itself (locked, so it
+    // tracks the month you point at).
+    function showTip(si, mi, anchor, locked) {
+      const s = series[si];
+      const pt = s.points.find((p) => p.mi === mi) || s.points[s.points.length - 1];
+      const hint = locked
+        ? "click again or press Esc to unlock"
+        : "click to lock · open in the list below";
+      tip
+        .html(
+          `<strong>${escapeHTML(s.acct.name)}</strong><br>` +
+            `${months[pt.mi].label}: ${NF.format(pt.v)} ${metric}` +
+            `<span class="tip-lean">${LEAN_LABEL[s.acct.lean]} · ${hint}</span>`
+        )
+        .style("opacity", 1);
+      const rect = el.getBoundingClientRect();
+      const ax = anchor.mode === "cursor" ? anchor.mx : x(pt.mi);
+      const ay = anchor.mode === "cursor" ? anchor.my : y(pt.v);
+      const cx = (ax / W) * rect.width;
+      const cy = (ay / H) * rect.height;
+      const tw = tip.node().offsetWidth;
+      const th = tip.node().offsetHeight;
+      let left = cx + 16;
+      if (left + tw > rect.width - 4) left = cx - tw - 16;
+      left = Math.max(4, Math.min(left, rect.width - tw - 4));
+      let top = cy - th - 14;
+      if (top < 4) top = cy + 18;
+      top = Math.max(4, Math.min(top, rect.height - th - 4));
+      tip.style("left", left + "px").style("top", top + "px");
+    }
+    const hideTip = () => tip.style("opacity", 0);
+
+    const nearestMonth = (mx) => {
+      let mi = 0;
+      let best = Infinity;
+      months.forEach((_, i) => {
+        const d = Math.abs(mx - x(i));
+        if (d < best) {
+          best = d;
+          mi = i;
+        }
+      });
+      return mi;
+    };
+
+    // Nearest visible series to (mi, my); returns { si, dist } (dist in SVG units).
+    function pickSeries(mi, my) {
+      let si = -1;
+      let dist = Infinity;
+      for (const cand of byMonth[mi]) {
+        if (!currentVisibleLeans.has(series[cand.si].acct.lean)) continue;
+        const d = Math.abs(my - cand.py);
+        if (d < dist) {
+          dist = d;
+          si = cand.si;
+        }
+      }
+      return { si, dist };
+    }
+
+    // Interaction surface.
     svg
       .append("rect")
+      .attr("class", "interaction")
       .attr("x", m.left)
       .attr("y", m.top)
       .attr("width", W - m.left - m.right)
@@ -198,40 +232,39 @@
       .style("cursor", "crosshair")
       .on("mousemove", function (event) {
         const [mx, my] = d3.pointer(event, svg.node());
-        // Nearest month by x.
-        let mi = 0;
-        let best = Infinity;
-        months.forEach((_, i) => {
-          const d = Math.abs(mx - x(i));
-          if (d < best) {
-            best = d;
-            mi = i;
-          }
-        });
-        // Nearest visible series by y at that month.
-        const visible = currentVisibleLeans;
-        let pick = -1;
-        let pickD = Infinity;
-        for (const cand of byMonth[mi]) {
-          if (!visible.has(series[cand.si].acct.lean)) continue;
-          const d = Math.abs(my - cand.py);
-          if (d < pickD) {
-            pickD = d;
-            pick = cand.si;
-          }
+        const mi = nearestMonth(mx);
+        if (lockedSi != null) {
+          // Locked: keep this line up; just read off the month under the cursor.
+          showTip(lockedSi, mi, { mode: "point" }, true);
+          return;
         }
-        if (pick >= 0) {
-          drawOverlay([pick], true, { mi, mx, my });
-          onHighlight && onHighlight(series[pick].acct);
+        const { si } = pickSeries(mi, my);
+        if (si >= 0) {
+          drawLines([si]);
+          showTip(si, mi, { mode: "cursor", mx, my }, false);
+          onHighlight && onHighlight(series[si].acct);
         }
       })
       .on("mouseleave", function () {
-        drawOverlay(null);
+        if (lockedSi != null) {
+          hideTip(); // keep the locked line, just drop the tooltip
+          return;
+        }
+        drawLines(null);
+        hideTip();
         onLeave && onLeave();
+      })
+      .on("click", function (event) {
+        const [mx, my] = d3.pointer(event, svg.node());
+        const mi = nearestMonth(mx);
+        const { si, dist } = pickSeries(mi, my);
+        // Clicking the locked line again, or clicking empty space, unlocks.
+        let target;
+        if (si < 0 || dist > 18) target = null;
+        else if (lockedSi === si) target = null;
+        else target = si;
+        onLock && onLock(target == null ? null : series[target].acct);
       });
-
-    // Track which leans are visible (mirrors legend toggles) for hit-testing.
-    let currentVisibleLeans = new Set(["left", "neutral", "right"]);
 
     return {
       metric,
@@ -240,11 +273,25 @@
         series.forEach((s, i) => map.set(s.acct._id, i));
         return map;
       })(),
+      // External (row hover / search) highlight — ignored while a line is locked.
       highlight(ids) {
-        drawOverlay(ids, false);
+        if (lockedSi != null) return;
+        drawLines(ids);
       },
       clear() {
-        drawOverlay(null);
+        if (lockedSi != null) return;
+        drawLines(null);
+        hideTip();
+      },
+      setLocked(si) {
+        lockedSi = si;
+        el.classList.toggle("is-locked", si != null);
+        if (si == null) {
+          drawLines(null);
+          hideTip();
+        } else {
+          drawLines([si]);
+        }
       },
       setVisibleLeans(set) {
         currentVisibleLeans = set;
@@ -256,16 +303,12 @@
     // Assign a stable id to each account for cross-chart lookup.
     data.accounts.forEach((a, i) => (a._id = i));
 
+    const make = (id, metric) =>
+      buildChart(document.getElementById(id), data, metric, hooks.onHover, hooks.onLeave, hooks.onLock);
     const charts = [
-      buildChart(document.getElementById("chart-posts"), data, "posts", hooks.onHover, hooks.onLeave),
-      buildChart(document.getElementById("chart-views"), data, "views", hooks.onHover, hooks.onLeave),
-      buildChart(
-        document.getElementById("chart-engagements"),
-        data,
-        "engagements",
-        hooks.onHover,
-        hooks.onLeave
-      ),
+      make("chart-posts", "posts"),
+      make("chart-views", "views"),
+      make("chart-engagements", "engagements"),
     ];
 
     return {
@@ -278,6 +321,13 @@
       },
       clear() {
         charts.forEach((c) => c.clear());
+      },
+      // Lock (freeze) one account across every chart, or null to release.
+      setLocked(accountId) {
+        charts.forEach((c) => {
+          const si = accountId == null ? null : c.seriesIndexByName.get(accountId);
+          c.setLocked(si == null ? null : si);
+        });
       },
       setVisibleLeans(set) {
         charts.forEach((c) => c.setVisibleLeans(set));
