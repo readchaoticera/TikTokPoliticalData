@@ -54,7 +54,9 @@
     }
 
     const x = d3.scalePoint().domain(months.map((_, i) => i)).range([m.left, W - m.right]).padding(0.5);
-    const y = d3.scaleLog().domain([Math.max(1, minV), maxV]).range([H - m.bottom, m.top]).nice();
+    // Linear scale anchored at 0 so vertical distance is proportional to the
+    // actual value (a jump from 1M→10M looks far smaller than 100M→1B).
+    const y = d3.scaleLinear().domain([0, maxV]).range([H - m.bottom, m.top]).nice();
 
     const svg = d3
       .select(el)
@@ -64,11 +66,8 @@
       .attr("role", "img")
       .attr("aria-label", `${metric} per month for ${series.length} political TikTok accounts, coloured by partisan lean`);
 
-    // Gridlines — powers of ten only, so the log axis stays readable.
-    const yTicks = [];
-    for (let e = Math.floor(Math.log10(Math.max(1, minV))); Math.pow(10, e) <= maxV * 1.0001; e++) {
-      yTicks.push(Math.pow(10, e));
-    }
+    // Evenly spaced linear gridlines.
+    const yTicks = y.ticks(6);
     svg
       .append("g")
       .attr("class", "grid")

@@ -87,7 +87,7 @@
       <section class="chart-block" aria-label="Total posts by month">
         <div class="chart-head">
           <h2>Total Posts by Month</h2>
-          <p>How many videos each account published each month. Log scale.</p>
+          <p>How many videos each account published each month.</p>
         </div>
         <div class="chart" id="chart-posts"></div>
       </section>
@@ -95,7 +95,7 @@
       <section class="chart-block" aria-label="Total views by month">
         <div class="chart-head">
           <h2>Total Views by Month</h2>
-          <p>Total views each account's content received each month. Log scale.</p>
+          <p>Total views each account's content received each month.</p>
         </div>
         <div class="chart" id="chart-views"></div>
       </section>
@@ -103,7 +103,7 @@
       <section class="chart-block" aria-label="Total engagements by month">
         <div class="chart-head">
           <h2>Total Engagements by Month</h2>
-          <p>Total likes, comments, shares, and saves each month. Log scale.</p>
+          <p>Total likes, comments, shares, and saves each month.</p>
         </div>
         <div class="chart" id="chart-engagements"></div>
       </section>
@@ -140,9 +140,10 @@
             content received that month (engagements = likes, comments, shares, and saves).
           </li>
           <li>
-            Charts use a <strong>logarithmic</strong> vertical scale so the full field — from
-            accounts posting a handful of videos to those pulling in billions of views — stays
-            legible on one screen.
+            Charts use a <strong>linear</strong> vertical scale, so equal vertical distances
+            represent equal differences in value — the gap from 100M to 1B is ten times the gap
+            from 1M to 10M. As a result the very largest accounts sit far above the pack; hover or
+            search to trace a specific account.
           </li>
           <li>
             <strong>Partisan lean</strong> is a <em>subjective editorial judgment</em>, not a

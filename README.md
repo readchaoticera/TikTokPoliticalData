@@ -58,8 +58,9 @@ array in `scripts/build-data.mjs`, and rebuild.
 
 ## Notes
 
-- Charts use a **logarithmic** vertical scale so accounts spanning a handful of
-  posts to billions of views all stay legible on one screen.
+- Charts use a **linear** vertical scale anchored at zero, so vertical distance
+  is proportional to the actual value (100M→1B spans ten times the height of
+  1M→10M). The largest accounts therefore sit well above the rest.
 - Only consistently active accounts are charted: present in **every** month and,
   in **every** month, posting at least **10 times** and receiving at least
   **500,000 views**. Accounts that miss any month or fall below those thresholds
