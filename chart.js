@@ -1,6 +1,6 @@
 /* Chaotic Era — Political TikTok monthly trend charts.
    Renders three longitudinal multi-line charts (posts, views, engagements),
-   one line per account, coloured by partisan lean. Exposes a small controller
+   one line per account, colored by partisan lean. Exposes a small controller
    (window.createTikTokCharts) so app.js can coordinate highlighting between the
    charts and the account directory. */
 (() => {
@@ -69,7 +69,7 @@
       .attr("viewBox", `0 0 ${W} ${H}`)
       .attr("class", "chart-svg")
       .attr("role", "img")
-      .attr("aria-label", `${metric} per month for ${series.length} political TikTok accounts, coloured by partisan lean`);
+      .attr("aria-label", `${metric} per month for ${series.length} political TikTok accounts, colored by partisan lean`);
 
     // The y-scale is swappable between linear (default) and log. `line`, the
     // gridline/axis ticks, and the hit-test pixel cache are all derived from it.

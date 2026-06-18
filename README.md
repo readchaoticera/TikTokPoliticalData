@@ -8,7 +8,7 @@ show, per account:
 - **Total views** received each month
 - **Total engagements** (likes, comments, shares, saves) received each month
 
-Every account is drawn as its own line, **coloured by partisan lean**
+Every account is drawn as its own line, **colored by partisan lean**
 (Left-Leaning, Neutral, Right-Leaning). Hover a line — or a row in the account
 directory — to trace a single account across all three charts, and click any
 account name to open its TikTok profile.
