@@ -51,7 +51,9 @@ const MONTHS = [
 const EXCLUDE = new Set();
 // Accounts to always include, even if they miss the every-month thresholds
 // below. Their line simply breaks for any month with no data.
-const ALLOW = new Set(["fox news", "team trump"]);
+const ALLOW = new Set(["fox news", "team trump", "headquarters"]);
+// Display-name overrides, keyed by the normalized source name.
+const RENAME = { headquarters: "KamalaHQ/Headquarters" };
 
 // Map the source lean labels onto the brand's three-bucket scheme.
 const LEAN_MAP = {
@@ -185,6 +187,12 @@ async function main() {
     const bv = lastValue(b.views);
     return bv - av;
   });
+
+  // Apply display-name overrides (after filtering, which matches source names).
+  for (const a of list) {
+    const renamed = RENAME[norm(a.name)];
+    if (renamed) a.name = renamed;
+  }
 
   const out = {
     title: "Political TikTok — Monthly Trends",
