@@ -47,6 +47,10 @@ const MONTHS = [
   { file: "MAY_2026.csv", key: "2026-05", label: "May 2026", short: "May" },
 ];
 
+// Accounts to exclude entirely (normalized names). Daily Mail's view volume is
+// so far above everyone else that it distorts the shared scale.
+const EXCLUDE = new Set(["daily mail"]);
+
 // Map the source lean labels onto the brand's three-bucket scheme.
 const LEAN_MAP = {
   "left-leaning": "left",
@@ -134,6 +138,7 @@ async function main() {
       const name = (cols[iEntity] || "").trim();
       if (!name) continue;
       const key = norm(name);
+      if (EXCLUDE.has(key)) continue;
       let rec = accounts.get(key);
       if (!rec) {
         rec = {
