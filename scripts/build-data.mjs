@@ -45,6 +45,10 @@ const MONTHS = [
   { file: "MARCH_2026.csv", key: "2026-03", label: "March 2026", short: "Mar" },
   { file: "APRIL_2026.csv", key: "2026-04", label: "April 2026", short: "Apr" },
   { file: "MAY_2026.csv", key: "2026-05", label: "May 2026", short: "May" },
+  // June 2026 comes from a broader "top entities across platforms" export, so an
+  // account being absent here doesn't disqualify it — qualify:false keeps it out
+  // of the every-month inclusion test while still displaying June data where present.
+  { file: "JUNE_2026.csv", key: "2026-06", label: "June 2026", short: "Jun", qualify: false },
 ];
 
 // Accounts to exclude entirely (normalized names).
@@ -175,10 +179,11 @@ async function main() {
   // This drops one-off and low-volume accounts so each line is a continuous,
   // meaningful series.
   const MIN_VIEWS = 500000;
+  const QUALIFY = MONTHS.filter((m) => m.qualify !== false);
   const complete = [...accounts.values()].filter(
     (a) =>
       ALLOW.has(norm(a.name)) ||
-      MONTHS.every((m) => a.views[m.key] >= MIN_VIEWS && a.posts[m.key] > 0 && a.engagements[m.key] > 0)
+      QUALIFY.every((m) => a.views[m.key] >= MIN_VIEWS && a.posts[m.key] > 0 && a.engagements[m.key] > 0)
   );
   const dropped = accounts.size - complete.length;
 
@@ -213,7 +218,7 @@ async function main() {
 
   const leanCounts = list.reduce((m, a) => ((m[a.lean] = (m[a.lean] || 0) + 1), m), {});
   console.log(
-    `Wrote data/timeseries.json — ${list.length} accounts present in all ${MONTHS.length} months ` +
+    `Wrote data/timeseries.json — ${list.length} accounts (qualified over ${QUALIFY.length} months, ${MONTHS.length} displayed) ` +
       `(left ${leanCounts.left || 0}, neutral ${leanCounts.neutral || 0}, right ${leanCounts.right || 0}); ` +
       `dropped ${dropped} below the every-month threshold (>=${MIN_VIEWS.toLocaleString()} views).`
   );
