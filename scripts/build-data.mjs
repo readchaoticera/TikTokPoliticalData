@@ -45,17 +45,14 @@ const MONTHS = [
   { file: "MARCH_2026.csv", key: "2026-03", label: "March 2026", short: "Mar" },
   { file: "APRIL_2026.csv", key: "2026-04", label: "April 2026", short: "Apr" },
   { file: "MAY_2026.csv", key: "2026-05", label: "May 2026", short: "May" },
-  // June 2026 comes from a broader "top entities across platforms" export, so an
-  // account being absent here doesn't disqualify it — qualify:false keeps it out
-  // of the every-month inclusion test while still displaying June data where present.
-  { file: "JUNE_2026.csv", key: "2026-06", label: "June 2026", short: "Jun", qualify: false },
+  { file: "JUNE_2026.csv", key: "2026-06", label: "June 2026", short: "Jun" },
 ];
 
 // Accounts to exclude entirely (normalized names).
 const EXCLUDE = new Set();
-// Accounts to always include, even if they miss the every-month thresholds
-// below. Their line simply breaks for any month with no data.
-const ALLOW = new Set(["fox news", "team trump", "headquarters"]);
+// Accounts to always include even if they miss a month. Empty: only channels
+// with data in every single month are charted.
+const ALLOW = new Set();
 // Display-name overrides, keyed by the normalized source name.
 const RENAME = { headquarters: "KamalaHQ/Headquarters" };
 
