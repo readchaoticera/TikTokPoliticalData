@@ -233,6 +233,8 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 24px 64px; }
 .chart.is-focused .ln { stroke-opacity: 0.16; }
 .chart.is-focused .dotpt { fill-opacity: 0.12; }
 .chart.is-locked .interaction { cursor: default; }
+/* Zoomed to a single locked account: hide the (now off-scale) rest of the field. */
+.chart.is-zoomed .lines { display: none; }
 
 /* Lean hidden via legend toggle */
 .hide-left .ln.lean-left, .hide-left .dotpt.lean-left,

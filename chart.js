@@ -73,23 +73,47 @@
 
     // The y-scale is swappable between linear (default) and log. `line`, the
     // gridline/axis ticks, and the hit-test pixel cache are all derived from it.
+    // When an account is locked, the axis zooms to fit just that account's range.
     let scaleType = "linear";
+    let lockedSi = null;
     let y;
     let yTicks;
     let line;
 
     function buildScale() {
-      if (scaleType === "log") {
-        // Each power of ten is equally spaced (compresses the giants).
-        y = d3.scaleLog().domain([minPos, maxV]).range([H - m.bottom, m.top]);
-        yTicks = [];
-        for (let e = Math.floor(Math.log10(minPos)); Math.pow(10, e) <= maxV * 1.0001; e++) {
-          yTicks.push(Math.pow(10, e));
+      const zoom = lockedSi != null;
+      // Domain: global normally; the locked account's own range (padded) when zoomed.
+      let dom;
+      if (zoom) {
+        const vals = series[lockedSi].points.map((p) => p.v);
+        const lo = Math.min(...vals);
+        const hi = Math.max(...vals);
+        if (scaleType === "log") {
+          dom = [Math.max(1, lo / 1.25), hi * 1.25];
+        } else {
+          const pad = (hi - lo ? (hi - lo) * 0.15 : hi * 0.1) || 1;
+          dom = [Math.max(0, lo - pad), hi + pad];
         }
-        if (!yTicks.length) yTicks = [minPos, maxV];
       } else {
-        // Anchored at 0 so vertical distance is proportional to actual value.
-        y = d3.scaleLinear().domain([0, maxV]).range([H - m.bottom, m.top]).nice();
+        dom = scaleType === "log" ? [minPos, maxV] : [0, maxV];
+      }
+
+      if (scaleType === "log") {
+        y = d3.scaleLog().domain(dom).range([H - m.bottom, m.top]);
+        if (zoom) {
+          yTicks = y.ticks(6);
+          if (!yTicks.length) yTicks = dom;
+        } else {
+          // Powers of ten keep the full-field log axis readable.
+          yTicks = [];
+          for (let e = Math.floor(Math.log10(dom[0])); Math.pow(10, e) <= dom[1] * 1.0001; e++) {
+            yTicks.push(Math.pow(10, e));
+          }
+          if (!yTicks.length) yTicks = dom;
+        }
+      } else {
+        y = d3.scaleLinear().domain(dom).range([H - m.bottom, m.top]);
+        if (!zoom) y.nice(); // full-field: round the top; zoom: keep the tight fit
         yTicks = y.ticks(6);
       }
       line = d3.line().defined((d) => d.v != null).x((d) => x(d.mi)).y((d) => y(d.v)).curve(d3.curveMonotoneX);
@@ -155,7 +179,6 @@
     // Track which leans are visible (mirrors legend toggles) for hit-testing,
     // and which series (if any) is currently locked open by a click.
     let currentVisibleLeans = new Set(["left", "neutral", "right"]);
-    let lockedSi = null;
 
     // Draw the bold highlight overlay for a set of series indices, and toggle
     // the dimming of the rest of the field.
@@ -340,11 +363,13 @@
       setLocked(si) {
         lockedSi = si;
         el.classList.toggle("is-locked", si != null);
+        el.classList.toggle("is-zoomed", si != null);
+        // Rebuild the y-scale (zooms to the locked account) and repaint.
+        buildScale();
+        redraw(); // redraw() draws the locked overlay when lockedSi != null
         if (si == null) {
           drawLines(null);
           hideTip();
-        } else {
-          drawLines([si]);
         }
       },
       setVisibleLeans(set) {
