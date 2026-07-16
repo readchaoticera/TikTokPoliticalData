@@ -23,18 +23,9 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 // Monthly files in chronological order. key is an ISO-ish sortable month id;
 // label is what the UI shows on the x-axis.
 const MONTHS = [
-  // short labels carry the year at each year boundary (Oct ’24, Jan ’25, Jan ’26)
-  // so the repeated months read unambiguously across the year changes.
-  { file: "OCTOBER_2024.csv", key: "2024-10", label: "October 2024", short: "Oct ’24" },
-  { file: "NOVEMBER_2024.csv", key: "2024-11", label: "November 2024", short: "Nov" },
-  { file: "DECEMBER_2024.csv", key: "2024-12", label: "December 2024", short: "Dec" },
-  { file: "JANUARY_2025.csv", key: "2025-01", label: "January 2025", short: "Jan ’25" },
-  { file: "FEBRUARY_2025.csv", key: "2025-02", label: "February 2025", short: "Feb" },
-  { file: "MARCH_2025.csv", key: "2025-03", label: "March 2025", short: "Mar" },
-  { file: "APRIL_2025.csv", key: "2025-04", label: "April 2025", short: "Apr" },
-  { file: "MAY_2025.csv", key: "2025-05", label: "May 2025", short: "May" },
-  { file: "JUNE_2025.csv", key: "2025-06", label: "June 2025", short: "Jun" },
-  { file: "JULY_2025.csv", key: "2025-07", label: "July 2025", short: "Jul" },
+  // short labels carry the year at each year boundary (Jul ’25, Jan ’26) so the
+  // months read unambiguously across the year change.
+  { file: "JULY_2025.csv", key: "2025-07", label: "July 2025", short: "Jul ’25" },
   { file: "AUGUST_2025.csv", key: "2025-08", label: "August 2025", short: "Aug" },
   { file: "SEPTEMBER_2025.csv", key: "2025-09", label: "September 2025", short: "Sep" },
   { file: "OCTOBER_2025.csv", key: "2025-10", label: "October 2025", short: "Oct" },
