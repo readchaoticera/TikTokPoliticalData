@@ -22,6 +22,7 @@
     meta: document.getElementById("meta"),
     banner: document.getElementById("banner"),
     search: document.getElementById("search"),
+    dirSearch: document.getElementById("dir-search"),
     legend: document.getElementById("legend"),
     charts: document.querySelectorAll(".chart"),
   };
@@ -54,15 +55,6 @@
     return null;
   }
 
-  // Average monthly views over the most recent `n` months (only months with
-  // data — handles accounts whose line breaks for some months).
-  function avgRecentViews(acct, n = 6) {
-    const keys = state.data.months.slice(-n).map((m) => m.key);
-    const vals = keys.map((k) => acct.views[k]).filter((v) => v != null);
-    if (!vals.length) return null;
-    return vals.reduce((a, b) => a + b, 0) / vals.length;
-  }
-
   function handle(url) {
     try {
       const p = new URL(url).pathname.replace(/^\/+|\/+$/g, "");
@@ -77,10 +69,8 @@
     const nameInner = url
       ? `<a href="${escapeHTML(url)}" target="_blank" rel="noopener" title="${escapeHTML(handle(url))}">${escapeHTML(acct.name)}</a>`
       : `<span>${escapeHTML(acct.name)}</span>`;
-    const avg = avgRecentViews(acct);
     return `<div class="dir-row" data-id="${acct._id}">
         <span class="dir-name"><i class="swatch" style="background:${leanColor(acct.lean)}"></i>${nameInner}</span>
-        <span class="dir-stat" title="Average monthly views over the last 6 months">${avg == null ? "—" : abbr(avg)}</span>
         <span class="dir-stat" title="Partisan lean">${LEAN_LABEL[acct.lean]}</span>
       </div>`;
   }
@@ -103,7 +93,7 @@
     const list = visibleAccounts();
     els.dirList.innerHTML =
       `<div class="dir-row dir-head">
-        <span>Account</span><span>Avg Views / Mo</span><span>Lean</span>
+        <span>Account</span><span>Lean</span>
       </div>` + list.map(rowHTML).join("");
     els.dirEmpty.hidden = list.length > 0;
     els.dirList.hidden = list.length === 0;
@@ -253,9 +243,13 @@
     applyLeanClasses();
     renderDirectory();
 
-    els.search.addEventListener("input", (e) => {
+    // Two search inputs (top controls + directory) share one filter; typing in
+    // either updates the other so they stay in sync.
+    function applyFilter(raw, source) {
       clearLock();
-      state.filter = nameKey(e.target.value);
+      state.filter = nameKey(raw);
+      if (source !== els.search && els.search.value !== raw) els.search.value = raw;
+      if (source !== els.dirSearch && els.dirSearch && els.dirSearch.value !== raw) els.dirSearch.value = raw;
       renderDirectory();
       // Reflect search matches on the charts when the set is small enough to read.
       const matches = visibleAccounts();
@@ -264,7 +258,9 @@
       } else {
         state.charts.clear();
       }
-    });
+    }
+    els.search.addEventListener("input", (e) => applyFilter(e.target.value, els.search));
+    if (els.dirSearch) els.dirSearch.addEventListener("input", (e) => applyFilter(e.target.value, els.dirSearch));
 
     if (window.parent && window.parent !== window) {
       window.addEventListener("load", postHeight);

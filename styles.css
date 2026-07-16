@@ -272,6 +272,7 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 24px 64px; }
 
 /* ---------- Account directory ---------- */
 .directory { margin-top: 34px; }
+.dir-search { display: block; width: 100%; max-width: 340px; margin-bottom: 12px; }
 .dir-list {
   background: var(--paper-card);
   border: 1px solid var(--line);
@@ -282,7 +283,7 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 24px 64px; }
 }
 .dir-row {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto;
   gap: 14px;
   align-items: center;
   padding: 9px 16px;
@@ -353,7 +354,7 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 24px 64px; }
 /* ---------- Responsive ---------- */
 @media (max-width: 720px) {
   .hero { padding: 36px 0 20px; }
-  .dir-row { grid-template-columns: 1fr auto auto; gap: 10px; padding: 9px 12px; }
+  .dir-row { grid-template-columns: 1fr auto; gap: 10px; padding: 9px 12px; }
   /* Drop the scale toggle below the heading instead of overlapping it. */
   .chart-head { padding-right: 0; }
   .scale-control { position: static; margin-top: 8px; }
