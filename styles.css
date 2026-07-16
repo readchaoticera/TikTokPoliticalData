@@ -343,6 +343,9 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 24px 64px; }
 .methodology h2 { font-family: var(--serif); font-size: 1.3rem; margin: 0 0 12px; }
 .methodology ul { margin: 0; padding-left: 20px; color: var(--ink-soft); }
 .methodology li { margin-bottom: 8px; font-size: 0.92rem; }
+.data-source { margin: 16px 0 0; font-size: 0.98rem; color: var(--ink); }
+.data-source a { color: var(--accent-dark); text-decoration: underline; text-underline-offset: 2px; }
+.data-source a:hover { text-decoration: none; }
 
 /* ---------- Footer ---------- */
 .site-footer { border-top: 1px solid var(--line); background: var(--ink); color: #aab4c0; }
